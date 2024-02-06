@@ -86,6 +86,72 @@ TODO
 - explain how we found how to structure the enums using the HTML options under each phoneHeader. name = plaintext,
   value = value
 
+## Getting testy
+
+Before we go further, let's create a file `lib.ts` in `wm-course-scraper`. This is where we're going to gather and
+export all our source code. Today, we'll also use it as a place to throw our tests.
+
+In `lib.ts`, import all the enums we just created like this:
+
+```typescript
+import {Attributes} from "./src/enums/attributes";
+import {Levels} from "./src/enums/levels";
+import {Status} from "./src/enums/status";
+import {Subjects} from "./src/enums/subjects";
+import {TermParts} from "./src/enums/term_part";
+
+console.log(Subjects)
+```
+
+The console log at the bottom there is similar to a Python print line. It'll print to your shell whatever arguments are
+passed to it, in this case, the entire Subjects enum.
+
+To run our code, it's a two-step process: first, we have to compile our typescript code into javascript, which is
+runnable, and second, run the javascript. Run these commands in your shell to do that:
+
+1. Compile to javascript (this will create .js copies of all the files in your directory)
+
+```shell
+tsc lib.ts
+```
+
+2. Run the resulting javascript file
+
+```shell
+node lib.js
+```
+
+You should see an output with the entire Subjects enum. If you don't, raise your hand.
+
+## Course, filter, scraper, oh my!
+
+Now we can finally get to the good stuff: actually coding our web scraper. Create three new files
+in `wm-fetch-test/src/classes`:
+
+1. `course.ts`. This is where we're going to process course data we get from the open course list into something we can
+   use.
+2. `filter.ts`. This is where we're going to build up a URL to perform a GET request, like we were looking at on the
+   site.
+3. `scraper.ts`. This is the heart and soul of our code. Everything else lives here.
+
+TODO explain course.ts
+
+TODO explain filter.ts
+
+- start with Filter
+- show example
+
+- then Course
+
+Scraper
+
+- constructor, privateURL
+- all (show example)
+- fetchAndParse/parseHTML
+- courses (show example)
+- extractCourses
+- terms/latestTerm at end or before extractCourses
+
 # Sources
 
 https://www.npmjs.com/package/wm-fetch -- DSC's very own Jason wrote the original package we adapted for this workshop
