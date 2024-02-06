@@ -1,0 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TermParts = void 0;
+var TermParts;
+(function (TermParts) {
+    TermParts["ALL"] = "0";
+    TermParts["FULL"] = "1";
+    TermParts["GRAD_BUSINESS"] = "M";
+    TermParts["GRAD_EDUCATION"] = "E";
+    TermParts["LAW"] = "L";
+    TermParts["MODULE_A"] = "A";
+    TermParts["MODULE_B"] = "B";
+    TermParts["NON_STANDARD_UNDERGRADUATE"] = "NSU";
+    TermParts["SUM_SESS_1"] = "S1";
+    TermParts["SUM_SESS_2"] = "S2";
+    TermParts["SUM_SESS_3"] = "S3";
+    TermParts["SUM_SESS_4"] = "S4";
+    TermParts["SUM_SESS_NON_STANDARD"] = "NS";
+    TermParts["SUMMER_STUDY_ABROAD"] = "AB";
+})(TermParts || (exports.TermParts = TermParts = {}));
+;
