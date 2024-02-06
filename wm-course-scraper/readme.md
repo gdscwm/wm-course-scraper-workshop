@@ -163,7 +163,7 @@ Next, still within the Course class definition, we can add a helpful function th
 The function will look something like:
 ```
     isOpen(): boolean {
-        //check if the course's status is Status.OPEN
+        // check if the course's status is Status.OPEN
     }
 ```
 Finally, we'll add a function to the Course class to parse the data that is read from the table. Data parsing can be messy business,
@@ -190,12 +190,88 @@ fromTable(data: Array<string>): Course {
         }
     }
 ```
-TODO explain filter.ts
+#### filter.ts
+Next, we'll build a Filter class that contains the data on the specific criteria we can pass to our searchs (e.g. subject, attribute, level...)
+This class will look similar to the Course class, in that the entire file (besides the imports) will be the class definition!
 
-- start with Filter
-- show example
+First, include your imports:
 
-- then Course
+```
+import { Attributes } from "../enums/attributes";
+import {Status} from "../enums/status";
+import {Levels} from "../enums/levels";
+import {Subjects} from "../enums/subjects";
+import {TermParts} from "../enums/term_part";
+```
+
+And we'll quickly define a `FilterError` class that describes any errors that we run into while constructing filters. Paste this just below the imports.
+```
+class FilterError extends Error {
+    constructor(message: string) {
+        super(`W&M Scrapper Error: ${message}`);
+        this.name = this.constructor.name;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+```
+
+Now, we can start the `Filter` class! Start your class definition like so: 
+```
+export class Filter {
+    public term?: number;
+
+    public attribute = Attributes.ALL;
+
+    public secondaryAttribute = Attributes.ALL;
+    ...
+```
+Make sure to add class attributes for all possible filters that users can select when searching for open courses.
+
+Next, still within the class defintion, we need to provide a constructor for a specific filter. This constructor takes in 
+as many filter attributes as possible and assigns them to the current filter object. 
+```
+    constructor(filters?: Partial<Filter>) {
+        // check if filters actually got passed in
+            // if so, use Object.assign to assign the filters to the present object
+        return this;
+    }
+```
+
+Next, we need to create a function that returns all the data a filter object holds. Define your function like so:
+```
+    public data() {
+        // A user must specify either an attribute or a subject -- if neither are included, throw an error
+
+        // If there are valid filters selected, return all data that the filter object holds, like so:
+        return {
+            term: { id: 'term_code', value: this.term.toString() },
+            subject: { id: 'term_subj', value: this.subject },
+            // Complete for all Course attributes
+        }
+    }
+```
+
+Finally, we actually need to build a URL from the specified filter. Define a function the same way as `data()`, but call it `url()`. 
+```
+    public url() {
+        // Call our data() function to get access to all filters
+
+        // The line below creates a new URL object with the base URL for the open course list
+        const url = new URL('https://courselist.wm.edu/courselist/courseinfo/searchresults');
+
+        // Loop through all the keys in the data {
+            url.searchParams.append(data[key].id, data[key].value);
+        }
+
+        // This last key-value pair is always included at the end of the course list query
+        url.searchParams.append('search', 'Search');
+
+        // Finally, return the url you constructed
+
+    }
+```
+
+Nice! We now have a class to hold all the possible filters that users can specify, and a way to construct URLs from them!
 
 Scraper
 
