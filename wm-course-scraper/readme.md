@@ -80,20 +80,30 @@ identified? What does the HTML for the webpage look like now?
 
 ## Defining our enums
 
-To send requests to the open course list, we need to construct URLs that look _exactly like_ the ones you see when you click `Search`.
+To send requests to the open course list, we need to construct URLs that look _exactly like_ the ones you see when you
+click `Search`.
 For example, if I select classes with the subject `Classical Civilization`, this is specified in the url like so:
-```
-term_subj=CLCV
-```
-and similarly for all other fields in the search form. 
 
-So, to construct proper URLs, we need to get all of the codes that the open course list uses for `Subject`, `Attribute`, `Level`, and so on. 
-This would take a lot of copy-paste! Thankfully, we've already compiled all the codes as `Enums` in the directory `wm-course-scraper/src/enums`. 
+```
+term_subj=CLCV 
+```
+
+and similarly for all other fields in the search form.
+
+So, to construct proper URLs, we need to get all of the codes that the open course list uses
+for `Subject`, `Attribute`, `Level`, and so on.
+This would take a lot of copy-paste! Thankfully, we've already compiled all the codes as `Enums` in the
+directory `wm-course-scraper/src/enums`.
 (Bonus question -- what is `Enum` short for??)
 
-Go ahead and copy all the  files in the enums directory into your local `src/enums` directory. These files hold the values that we will use to construct our URLs.
+Go ahead and copy all the files in the enums directory into your local `src/enums` directory. These files hold the
+values that we will use to construct our URLs.
 
-How did we know what values to put in all of these files? In your inspect tab, in the `<form>` section, open one of the `<div class="phoneHeader">` sections. Dig down until you reach a section like `<select name="...`.  Expand this section, and note all of the `<option>` sections within the select. Compare these HTML sections with what we have compiled in `subjects.ts`, for example. Note that how `<option value="BIOL">Biology</Biology>` becomes `BIOLOGY = 'BIOL'`, for example.
+How did we know what values to put in all of these files? In your inspect tab, in the `<form>` section, open one of
+the `<div class="phoneHeader">` sections. Dig down until you reach a section like `<select name="...`. Expand this
+section, and note all of the `<option>` sections within the select. Compare these HTML sections with what we have
+compiled in `subjects.ts`, for example. Note that how `<option value="BIOL">Biology</Biology>`
+becomes `BIOLOGY = 'BIOL'`, for example.
 
 Now, we have all of the appropriate fields to construct our URLs!
 
@@ -146,9 +156,13 @@ in `wm-fetch-test/src/classes`:
 3. `scraper.ts`. This is the heart and soul of our code. Everything else lives here.
 
 #### course.ts
-First, we need a class that can hold the data for a single course. Looking at the results page for a search, what information do we need to hold?
-We'll need to hold information like `crn`, `course_title`, `instructor_name`, basically everything you see in a row in the results table. 
+
+First, we need a class that can hold the data for a single course. Looking at the results page for a search, what
+information do we need to hold?
+We'll need to hold information like `crn`, `course_title`, `instructor_name`, basically everything you see in a row in
+the results table.
 The class will look something like this:
+
 ```
 export class Course {
     public crn: number;
@@ -159,8 +173,10 @@ export class Course {
 
 Add the appropriate fields to hold values for `instructor`, `credits`, etc.
 
-Next, still within the Course class definition, we can add a helpful function that will tell us if the Course is open or not. 
+Next, still within the Course class definition, we can add a helpful function that will tell us if the Course is open or
+not.
 The function will look something like:
+
 ```
     isOpen(): boolean {
         //check if the course's status is Status.OPEN
@@ -174,9 +190,35 @@ TODO explain filter.ts
 
 - then Course
 
-Scraper
+#### scraper.ts
 
-- constructor, privateURL
+A lot of functions are going to live in this file. Let's start at the beginning: the constructor. All we need our
+constructor to do is return an instance of Scraper that we can use other class methods on. Similar to Python, we need to
+access class methods with the "this" keyword. So we would simply write:
+
+```typescript
+export class Scraper {
+    constructor() {
+        return this;
+    }
+}
+```
+
+We should also define any class variables here. We'll need a URL instance to craft our GET requests later, so let's
+define that at the start too.
+
+```typescript
+export class Scraper {
+    private URL = new URL('https://courselist.wm.edu/courselist/');
+
+    constructor() {
+        return this;
+    }
+}
+```
+
+~~- constructor, privateURL~~
+
 - all (show example)
 - fetchAndParse/parseHTML
 - courses (show example)
