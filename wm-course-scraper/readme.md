@@ -155,143 +155,11 @@ in `wm-fetch-test/src/classes`:
    site.
 3. `scraper.ts`. This is the heart and soul of our code. Everything else lives here.
 
-#### course.ts
-
-First, we need a class that can hold the data for a single course. Looking at the results page for a search, what
-information do we need to hold?
-We'll need to hold information like `crn`, `course_title`, `instructor_name`, basically everything you see in a row in
-the results table.
-The class will look something like this:
-
-```
-export class Course {
-    public crn: number;
-    public id: string;
-    public attributes: Array<string> = [];
-    ...
-```
-
-Add the appropriate fields to hold values for `instructor`, `credits`, etc.
-
-Next, still within the Course class definition, we can add a helpful function that will tell us if the Course is open or
-not.
-The function will look something like:
-
-```
-    isOpen(): boolean {
-        // check if the course's status is Status.OPEN
-    }
-```
-Finally, we'll add a function to the Course class to parse the data that is read from the table. Data parsing can be messy business,
-so it'd be best if you copy the function below exactly and paste it into your Course class:
-```
-fromTable(data: Array<string>): Course {
-        try {
-            this.crn = parseInt(data[0].replace(/(\r\n|\n|\r)/gm, "").trim());
-            this.id = data[1].replace(/(\r\n|\n|\r)/gm, "").trim();
-            this.attributes = data[2].replace(/(\r\n|\n|\r)/gm, "").trim().split(',');
-            this.title = data[3].replace(/(\r\n|\n|\r)/gm, "").trim();
-            this.instructor = data[4].replace(/(\r\n|\n|\r)/gm, "").trim();
-            this.credits = parseFloat(data[5].replace(/(\r\n|\n|\r)/gm, "").trim());
-            this.times = data[6].replace(/(\r\n|\n|\r)/gm, "").trim();
-            this.enrollment = {
-                projected: parseInt(data[7].replace(/(\r\n|\n|\r)/gm, "").trim()),
-                current: parseInt(data[8].replace(/(\r\n|\n|\r)/gm, "").trim()),
-                available: parseInt(data[9].replace(/(\r\n|\n|\r)/gm, "").trim()),
-            };
-            this.status = data[10].replace(/(\r\n|\n|\r)/gm, "").trim();
-            return this;
-        } catch (e) {
-            throw new ScraperError("Error parsing course data: "+e);
-        }
-    }
-```
-#### filter.ts
-Next, we'll build a Filter class that contains the data on the specific criteria we can pass to our searchs (e.g. subject, attribute, level...)
-This class will look similar to the Course class, in that the entire file (besides the imports) will be the class definition!
-
-First, include your imports:
-
-```
-import { Attributes } from "../enums/attributes";
-import {Status} from "../enums/status";
-import {Levels} from "../enums/levels";
-import {Subjects} from "../enums/subjects";
-import {TermParts} from "../enums/term_part";
-```
-
-And we'll quickly define a `FilterError` class that describes any errors that we run into while constructing filters. Paste this just below the imports.
-```
-class FilterError extends Error {
-    constructor(message: string) {
-        super(`W&M Scrapper Error: ${message}`);
-        this.name = this.constructor.name;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-```
-
-Now, we can start the `Filter` class! Start your class definition like so: 
-```
-export class Filter {
-    public term?: number;
-
-    public attribute = Attributes.ALL;
-
-    public secondaryAttribute = Attributes.ALL;
-    ...
-```
-Make sure to add class attributes for all possible filters that users can select when searching for open courses.
-
-Next, still within the class defintion, we need to provide a constructor for a specific filter. This constructor takes in 
-as many filter attributes as possible and assigns them to the current filter object. 
-```
-    constructor(filters?: Partial<Filter>) {
-        // check if filters actually got passed in
-            // if so, use Object.assign to assign the filters to the present object
-        return this;
-    }
-```
-
-Next, we need to create a function that returns all the data a filter object holds. Define your function like so:
-```
-    public data() {
-        // A user must specify either an attribute or a subject -- if neither are included, throw an error
-
-        // If there are valid filters selected, return all data that the filter object holds, like so:
-        return {
-            term: { id: 'term_code', value: this.term.toString() },
-            subject: { id: 'term_subj', value: this.subject },
-            // Complete for all Course attributes
-        }
-    }
-```
-
-Finally, we actually need to build a URL from the specified filter. Define a function the same way as `data()`, but call it `url()`. 
-```
-    public url() {
-        // Call our data() function to get access to all filters
-
-        // The line below creates a new URL object with the base URL for the open course list
-        const url = new URL('https://courselist.wm.edu/courselist/courseinfo/searchresults');
-
-        // Loop through all the keys in the data {
-            url.searchParams.append(data[key].id, data[key].value);
-        }
-
-        // This last key-value pair is always included at the end of the course list query
-        url.searchParams.append('search', 'Search');
-
-        // Finally, return the url you constructed
-
-    }
-```
-
-Nice! We now have a class to hold all the possible filters that users can specify, and a way to construct URLs from them!
-
 #### scraper.ts
 
-A lot of functions are going to live in this file. Let's start at the beginning: the constructor. All we need our
+Why not start with the heart and soul of our code?
+
+Let's start at the beginning: the constructor. All we need our
 constructor to do is return an instance of Scraper that we can use other class methods on. Similar to Python, we need to
 access class methods with the "this" keyword. So we would simply write:
 
@@ -316,13 +184,242 @@ export class Scraper {
 }
 ```
 
-~~- constructor, privateURL~~
+The next function we're going to implement is one to return all the courses in the course list. It should look
+like this:
 
-- all (show example)
-- fetchAndParse/parseHTML
-- courses (show example)
-- extractCourses
-- terms/latestTerm at end or before extractCourses
+```typescript
+public async
+all(term
+:
+int
+):
+Promise < Array > {
+    // create an array to store our courses
+    const courses = Array();
+
+    // get all our subjects except the ALL subject
+    const subjects = Object.values(Subjects).slice(1);
+
+    const filters = subjects.map(subject => new Filter({subject, ...term}));
+    const res = await Promise.all(filters.map(filter => this.courses(filter)));
+    courses.push(...res.flat())
+
+    return courses;
+}
+```
+
+To make this function work, we have to implement our Filter class.
+
+#### filter.ts
+
+Next, we'll build a Filter class that contains the data on the specific criteria we can pass to our searches (e.g.
+subject, attribute, level...)
+
+First, include your imports:
+
+```
+import { Attributes } from "../enums/attributes";
+import {Status} from "../enums/status";
+import {Levels} from "../enums/levels";
+import {Subjects} from "../enums/subjects";
+import {TermParts} from "../enums/term_part";
+```
+
+Now, we can start the `Filter` class! Start your class definition like so:
+
+```
+export class Filter {
+    public term?: number;
+
+    public attribute = Attributes.ALL;
+
+    public secondaryAttribute = Attributes.ALL;
+    ...
+```
+
+We want to add class attributes like this for all possible filters that users can select when searching for open
+courses. Hint: it'll match up with all the files we imported up top.
+
+Next, still within the class definition, we need to provide a constructor for a specific filter. This constructor takes
+in as many filter attributes as possible and assigns them to the current filter object.
+
+```
+    constructor(filters?: Partial<Filter>) {
+        // check if filters actually got passed in
+            // if so, use Object.assign to assign the filters to the present object
+        return this;
+    }
+```
+
+Next, we need to create a function that returns all the data a filter object holds. Define your function like so:
+
+```
+    public data() {
+        // A user must specify either an attribute or a subject -- if neither are included, throw an error
+
+        // If there are valid filters selected, return all data that the filter object holds, like so:
+        return {
+            term: { id: 'term_code', value: this.term.toString() },
+            subject: { id: 'term_subj', value: this.subject },
+            // Complete for all Course attributes
+        }
+    }
+```
+
+Finally, we actually need to build a URL from the specified filter. Define a function the same way as `data()`, but call
+it `url()`.
+
+```
+    public url() {
+        // Call our data() function to get access to all filters
+
+        // The line below creates a new URL object with the base URL for the open course list
+        const url = new URL('https://courselist.wm.edu/courselist/courseinfo/searchresults');
+
+        // Loop through all the keys in the data {
+            url.searchParams.append(data[key].id, data[key].value);
+        }
+
+        // This last key-value pair is always included at the end of the course list query
+        url.searchParams.append('search', 'Search');
+
+        // Finally, return the url you constructed
+
+    }
+```
+
+Nice! We now have a class to hold all the possible filters that users can specify, and a way to construct URLs from
+them!
+
+#### Cooking with grease (and filters)
+
+Let's put it all together! In order to test async functions, we'll need to create a main function in our lib.ts so that
+we can await their responses. Add this to your lib.ts:
+
+```typescript
+async function main() {
+    const scraper = new Scraper();
+    const courses = await scraper.all(202420);
+    console.log(courses)
+}
+
+main()
+```
+
+Remember to call main at the end. When you run lib.ts again, it should return a list of all the courses for the term we
+passed in, Spring 2024!
+
+[//]: # (#### course.ts)
+
+[//]: # ()
+
+[//]: # (First, we need a class that can hold the data for a single course. Looking at the results page for a search, what)
+
+[//]: # (information do we need to hold?)
+
+[//]: # (We'll need to hold information like `crn`, `course_title`, `instructor_name`, basically everything you see in a row in)
+
+[//]: # (the results table.)
+
+[//]: # (The class will look something like this:)
+
+[//]: # ()
+
+[//]: # (```)
+
+[//]: # (export class Course {)
+
+[//]: # (    public crn: number;)
+
+[//]: # (    public id: string;)
+
+[//]: # (    public attributes: Array<string> = [];)
+
+[//]: # (    ...)
+
+[//]: # (```)
+
+[//]: # ()
+
+[//]: # (Add the appropriate fields to hold values for `instructor`, `credits`, etc.)
+
+[//]: # ()
+
+[//]: # (Next, still within the Course class definition, we can add a helpful function that will tell us if the Course is open or)
+
+[//]: # (not.)
+
+[//]: # (The function will look something like:)
+
+[//]: # ()
+
+[//]: # (```)
+
+[//]: # (    isOpen&#40;&#41;: boolean {)
+
+[//]: # (        // check if the course's status is Status.OPEN)
+
+[//]: # (    })
+
+[//]: # (```)
+
+[//]: # ()
+
+[//]: # (Finally, we'll add a function to the Course class to parse the data that is read from the table. Data parsing can be)
+
+[//]: # (messy business,)
+
+[//]: # (so it'd be best if you copy the function below exactly and paste it into your Course class:)
+
+[//]: # ()
+
+[//]: # (```)
+
+[//]: # (fromTable&#40;data: Array<string>&#41;: Course {)
+
+[//]: # (        try {)
+
+[//]: # (            this.crn = parseInt&#40;data[0].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;;)
+
+[//]: # (            this.id = data[1].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
+
+[//]: # (            this.attributes = data[2].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;.split&#40;','&#41;;)
+
+[//]: # (            this.title = data[3].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
+
+[//]: # (            this.instructor = data[4].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
+
+[//]: # (            this.credits = parseFloat&#40;data[5].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;;)
+
+[//]: # (            this.times = data[6].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
+
+[//]: # (            this.enrollment = {)
+
+[//]: # (                projected: parseInt&#40;data[7].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;,)
+
+[//]: # (                current: parseInt&#40;data[8].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;,)
+
+[//]: # (                available: parseInt&#40;data[9].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;,)
+
+[//]: # (            };)
+
+[//]: # (            this.status = data[10].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
+
+[//]: # (            return this;)
+
+[//]: # (        } catch &#40;e&#41; {)
+
+[//]: # (            throw new Error&#40;"Error parsing course data: "+e&#41;;)
+
+[//]: # (        })
+
+[//]: # (    })
+
+[//]: # (```)
+
+
+
+There are a bunch more things we can and will do with this scraper, but we'll pick up next workshop. See you then!
 
 # Sources
 
