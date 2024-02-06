@@ -166,7 +166,30 @@ The function will look something like:
         //check if the course's status is Status.OPEN
     }
 ```
-
+Finally, we'll add a function to the Course class to parse the data that is read from the table. Data parsing can be messy business,
+so it'd be best if you copy the function below exactly and paste it into your Course class:
+```
+fromTable(data: Array<string>): Course {
+        try {
+            this.crn = parseInt(data[0].replace(/(\r\n|\n|\r)/gm, "").trim());
+            this.id = data[1].replace(/(\r\n|\n|\r)/gm, "").trim();
+            this.attributes = data[2].replace(/(\r\n|\n|\r)/gm, "").trim().split(',');
+            this.title = data[3].replace(/(\r\n|\n|\r)/gm, "").trim();
+            this.instructor = data[4].replace(/(\r\n|\n|\r)/gm, "").trim();
+            this.credits = parseFloat(data[5].replace(/(\r\n|\n|\r)/gm, "").trim());
+            this.times = data[6].replace(/(\r\n|\n|\r)/gm, "").trim();
+            this.enrollment = {
+                projected: parseInt(data[7].replace(/(\r\n|\n|\r)/gm, "").trim()),
+                current: parseInt(data[8].replace(/(\r\n|\n|\r)/gm, "").trim()),
+                available: parseInt(data[9].replace(/(\r\n|\n|\r)/gm, "").trim()),
+            };
+            this.status = data[10].replace(/(\r\n|\n|\r)/gm, "").trim();
+            return this;
+        } catch (e) {
+            throw new ScraperError("Error parsing course data: "+e);
+        }
+    }
+```
 TODO explain filter.ts
 
 - start with Filter
