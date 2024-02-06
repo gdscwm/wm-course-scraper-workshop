@@ -31,13 +31,13 @@ npm) [here](https://nodejs.org/en/download/).
 Once you have npm installed, run
 
 ```shell
-npm install typescript --save-dev
+npm install typescript
 ```
 
 This will allow us to code in typescript.
 
 ```shell
-npm install --save @types/jsdom
+npm install --save-dev @types/jsdom
 ```
 
 This will allow us to access parts of the Open Course List webpage.
