@@ -145,7 +145,27 @@ in `wm-fetch-test/src/classes`:
    site.
 3. `scraper.ts`. This is the heart and soul of our code. Everything else lives here.
 
-TODO explain course.ts
+#### course.ts
+First, we need a class that can hold the data for a single course. Looking at the results page for a search, what information do we need to hold?
+We'll need to hold information like `crn`, `course_title`, `instructor_name`, basically everything you see in a row in the results table. 
+The class will look something like this:
+```
+export class Course {
+    public crn: number;
+    public id: string;
+    public attributes: Array<string> = [];
+    ...
+```
+
+Add the appropriate fields to hold values for `instructor`, `credits`, etc.
+
+Next, still within the Course class definition, we can add a helpful function that will tell us if the Course is open or not. 
+The function will look something like:
+```
+    isOpen(): boolean {
+        //check if the course's status is Status.OPEN
+    }
+```
 
 TODO explain filter.ts
 
