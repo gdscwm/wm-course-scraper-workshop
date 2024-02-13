@@ -184,31 +184,48 @@ export class Scraper {
 }
 ```
 
-The next function we're going to implement is one to return all the courses in the course list. It should look
-like this:
+The next function we're going to implement is one to return all the courses in the course list. But to make that work,
+we have to implement our Filter class.
 
-```typescript
-public async
-all(term
-:
-int
-):
-Promise < Array > {
-    // create an array to store our courses
-    const courses = Array();
+[//]: # (```typescript)
 
-    // get all our subjects except the ALL subject
-    const subjects = Object.values(Subjects).slice(1);
+[//]: # (public async)
 
-    const filters = subjects.map(subject => new Filter({subject, ...term}));
-    const res = await Promise.all(filters.map(filter => this.courses(filter)));
-    courses.push(...res.flat())
+[//]: # (all&#40;term)
 
-    return courses;
-}
-```
+[//]: # (:)
 
-To make this function work, we have to implement our Filter class.
+[//]: # (int)
+
+[//]: # (&#41;:)
+
+[//]: # (Promise < Array > {)
+
+[//]: # (    // create an array to store our courses)
+
+[//]: # (    const courses = Array&#40;&#41;;)
+
+[//]: # ()
+
+[//]: # (    // get all our subjects except the ALL subject)
+
+[//]: # (    const subjects = Object.values&#40;Subjects&#41;.slice&#40;1&#41;;)
+
+[//]: # ()
+
+[//]: # (    const filters = subjects.map&#40;subject => new Filter&#40;{subject, ...term}&#41;&#41;;)
+
+[//]: # (    const res = await Promise.all&#40;filters.map&#40;filter => this.courses&#40;filter&#41;&#41;&#41;;)
+
+[//]: # (    courses.push&#40;...res.flat&#40;&#41;&#41;)
+
+[//]: # ()
+
+[//]: # (    return courses;)
+
+[//]: # (})
+
+[//]: # (```)
 
 #### filter.ts
 
@@ -291,23 +308,62 @@ it `url()`.
 Nice! We now have a class to hold all the possible filters that users can specify, and a way to construct URLs from
 them!
 
-#### Cooking with grease (and filters)
-
-Let's put it all together! In order to test async functions, we'll need to create a main function in our lib.ts so that
-we can await their responses. Add this to your lib.ts:
+Let's test this out to make sure everything's working as expected. In `lib.ts`, construct a new filter like so:
 
 ```typescript
-async function main() {
-    const scraper = new Scraper();
-    const courses = await scraper.all(202420);
-    console.log(courses)
-}
-
-main()
+const filter = new Filter({
+    subject: Subjects.COMPUTER_SCIENCE,
+    attribute: Attributes.COLLEGE_400,
+    term: 202420
+})
+console.log(filter)
 ```
 
-Remember to call main at the end. When you run lib.ts again, it should return a list of all the courses for the term we
-passed in, Spring 2024!
+This should return a `Filter` object with attribute: C400, subject: CSCI, and term: 202420, with the rest of the values
+
+0. (Remember to first compile `lib.ts` to javascript with `tsc lib.ts`, then run the resulting .js file
+   with `node lib.js`.)
+
+We can also test that we're constructing our URL correctly:
+
+```typescript
+const url = filter.url();
+console.log(url.href)   // should log https://courselist.wm.edu/courselist/courseinfo/searchresults?term_code=202420&term_subj=CSCI&attr=C400&attr2=0&levl=0&status=0&ptrm=0&search=Search
+```
+
+[//]: # (#### Cooking with grease &#40;and filters&#41;)
+
+[//]: # ()
+
+[//]: # (Let's put it all together! In order to test async functions, we'll need to create a main function in our lib.ts so that)
+
+[//]: # (we can await their responses. Add this to your lib.ts:)
+
+[//]: # ()
+
+[//]: # (```typescript)
+
+[//]: # (async function main&#40;&#41; {)
+
+[//]: # (    const scraper = new Scraper&#40;&#41;;)
+
+[//]: # (    const courses = await scraper.all&#40;202420&#41;;)
+
+[//]: # (    console.log&#40;courses&#41;)
+
+[//]: # (})
+
+[//]: # ()
+
+[//]: # (main&#40;&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+
+[//]: # (Remember to call main at the end. When you run lib.ts again, it should return a list of all the courses for the term we)
+
+[//]: # (passed in, Spring 2024!)
 
 [//]: # (#### course.ts)
 
@@ -419,7 +475,7 @@ passed in, Spring 2024!
 
 
 
-There are a bunch more things we can and will do with this scraper, but we'll pick up next workshop. See you then!
+We'll stop here this week and pick up next workshop. See you then!
 
 # Sources
 
