@@ -365,115 +365,88 @@ console.log(url.href)   // should log https://courselist.wm.edu/courselist/cours
 
 [//]: # (passed in, Spring 2024!)
 
-[//]: # (#### course.ts)
+#### course.ts
 
-[//]: # ()
+First, we need a class that can hold the data for a single course. Looking at the results page for a search, what
+information do we need to hold?
 
-[//]: # (First, we need a class that can hold the data for a single course. Looking at the results page for a search, what)
+We'll need to hold information like `crn`, `course_title`, `instructor_name`, basically everything you see in a row in
+the results table. The class will look something like this:
 
-[//]: # (information do we need to hold?)
+```
 
-[//]: # (We'll need to hold information like `crn`, `course_title`, `instructor_name`, basically everything you see in a row in)
+export class Course {
 
-[//]: # (the results table.)
+    public crn: number;
 
-[//]: # (The class will look something like this:)
+    public id: string;
 
-[//]: # ()
+    public attributes: Array<string> = [];
 
-[//]: # (```)
+    ...
 
-[//]: # (export class Course {)
+```
 
-[//]: # (    public crn: number;)
+Add the appropriate fields to hold values for `instructor`, `credits`, etc. Next, still within the Course class
+definition, we can add a helpful function that will tell us if the Course is open or not. The function will look
+something like:
 
-[//]: # (    public id: string;)
+```
 
-[//]: # (    public attributes: Array<string> = [];)
+    isOpen(): boolean {
 
-[//]: # (    ...)
+        // check if the course's status is Status.OPEN
 
-[//]: # (```)
+    }
 
-[//]: # ()
+```
 
-[//]: # (Add the appropriate fields to hold values for `instructor`, `credits`, etc.)
+Finally, we'll add a function to the Course class to parse the data that is read from the table. Data parsing can be
+messy business, so it'd be best if you copy the function below exactly and paste it into your Course class:
 
-[//]: # ()
+```
 
-[//]: # (Next, still within the Course class definition, we can add a helpful function that will tell us if the Course is open or)
+fromTable(data: Array<string>): Course {
 
-[//]: # (not.)
+        try {
 
-[//]: # (The function will look something like:)
+            this.crn = parseInt(data[0].replace(/(\r\n|\n|\r)/gm, "").trim());
 
-[//]: # ()
+            this.id = data[1].replace(/(\r\n|\n|\r)/gm, "").trim();
 
-[//]: # (```)
+            this.attributes = data[2].replace(/(\r\n|\n|\r)/gm, "").trim().split(',');
 
-[//]: # (    isOpen&#40;&#41;: boolean {)
+            this.title = data[3].replace(/(\r\n|\n|\r)/gm, "").trim();
 
-[//]: # (        // check if the course's status is Status.OPEN)
+            this.instructor = data[4].replace(/(\r\n|\n|\r)/gm, "").trim();
 
-[//]: # (    })
+            this.credits = parseFloat(data[5].replace(/(\r\n|\n|\r)/gm, "").trim());
 
-[//]: # (```)
+            this.times = data[6].replace(/(\r\n|\n|\r)/gm, "").trim();
 
-[//]: # ()
+            this.enrollment = {
 
-[//]: # (Finally, we'll add a function to the Course class to parse the data that is read from the table. Data parsing can be)
+                projected: parseInt(data[7].replace(/(\r\n|\n|\r)/gm, "").trim()),
 
-[//]: # (messy business,)
+                current: parseInt(data[8].replace(/(\r\n|\n|\r)/gm, "").trim()),
 
-[//]: # (so it'd be best if you copy the function below exactly and paste it into your Course class:)
+                available: parseInt(data[9].replace(/(\r\n|\n|\r)/gm, "").trim()),
 
-[//]: # ()
+            };
 
-[//]: # (```)
+            this.status = data[10].replace(/(\r\n|\n|\r)/gm, "").trim();
 
-[//]: # (fromTable&#40;data: Array<string>&#41;: Course {)
+            return this;
 
-[//]: # (        try {)
+        } catch (e) {
 
-[//]: # (            this.crn = parseInt&#40;data[0].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;;)
+            throw new Error("Error parsing course data: "+e);
 
-[//]: # (            this.id = data[1].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
+        }
 
-[//]: # (            this.attributes = data[2].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;.split&#40;','&#41;;)
+    }
 
-[//]: # (            this.title = data[3].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
-
-[//]: # (            this.instructor = data[4].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
-
-[//]: # (            this.credits = parseFloat&#40;data[5].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;;)
-
-[//]: # (            this.times = data[6].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
-
-[//]: # (            this.enrollment = {)
-
-[//]: # (                projected: parseInt&#40;data[7].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;,)
-
-[//]: # (                current: parseInt&#40;data[8].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;,)
-
-[//]: # (                available: parseInt&#40;data[9].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;&#41;,)
-
-[//]: # (            };)
-
-[//]: # (            this.status = data[10].replace&#40;/&#40;\r\n|\n|\r&#41;/gm, ""&#41;.trim&#40;&#41;;)
-
-[//]: # (            return this;)
-
-[//]: # (        } catch &#40;e&#41; {)
-
-[//]: # (            throw new Error&#40;"Error parsing course data: "+e&#41;;)
-
-[//]: # (        })
-
-[//]: # (    })
-
-[//]: # (```)
-
-
+```
 
 We'll stop here this week and pick up next workshop. See you then!
 
