@@ -1,4 +1,4 @@
-# W&M Course Scraper
+# W&M Course Scraper: Workshop 1
 
 ## Setup
 
