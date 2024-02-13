@@ -10,7 +10,7 @@ const filter = new Filter({
     attribute: Attributes.COLLEGE_400,
     term: 202420
 })
-console.log(filter.data())
+console.log(filter)
 
 const url = filter.url();
 console.log(url.href)   // should log https://courselist.wm.edu/courselist/courseinfo/searchresults?term_code=202420&term_subj=CSCI&attr=C400&attr2=0&levl=0&status=0&ptrm=0&search=Search
